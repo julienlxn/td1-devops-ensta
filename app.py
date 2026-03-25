@@ -11,7 +11,8 @@ def load_data():
 def display_metrics(data):
     total = data["amount"].sum()
     count = len(data)
-    avg = total // count if count > 0 else 0
+    if count ==0 : avg = 0
+    else : avg = total // count 
 
     col1, col2, col3 = st.columns(3)
     col1.metric("Total ventes", f"{total} €")

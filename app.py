@@ -24,7 +24,7 @@ def main():
     # Recherche
     search = st.text_input("🔍 Rechercher un produit")
     if search:
-        data = data[data["product"].str.contains(search)]
+        data = data[data["product"].str.contains(search, regex=False)]
 
     # Filtre
     products = data["product"].unique().tolist()

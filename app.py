@@ -1,8 +1,22 @@
 import streamlit as st
 import pandas as pd
+import redis
+import os
+
+try:
+    redis_host = os.getenv("REDIS_HOST", "localhost")
+    r = redis.Redis(host=redis_host, port=6379, decode_responses=True, socket_connect_timeout=2)
+    r.ping()
+    visit_count = r.incr("visits")
+    redis_ok = True
+except Exception:
+    visit_count = None
+    redis_ok = False
 
 st.set_page_config(page_title="ENSTArtup Analytics", page_icon="📊")
 st.title("📊 ENSTArtup Analytics")
+if redis_ok:
+    st.caption(f"👁️ Visites : {visit_count}")
 st.write("Bienvenue sur le dashboard de ENSTArtup !")
 
 def load_data():

@@ -14,7 +14,8 @@ except Exception:
     redis_ok = False
 
 st.set_page_config(page_title="ENSTArtup Analytics", page_icon="📊")
-st.title("📊 ENSTArtup Analytics")
+app_title = os.getenv("APP_TITLE", "ENSTArtup Analytics")
+st.title(f"📊 {app_title}")
 if redis_ok:
     st.caption(f"👁️ Visites : {visit_count}")
 st.write("Bienvenue sur le dashboard de ENSTArtup !")

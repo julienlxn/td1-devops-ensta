@@ -363,17 +363,20 @@ Vous pouvez aussi scanner tous les fichiers du systeme, et filtrer avec `grep` d
 
 ### Questions
 
+- Résultat cat /root/flag.txt : Permission denied
+- Groupes : julien docker
+- Commande docker utilisée : docker run -v /:/mnt --rm -it alpine cat /mnt/root/flag.txt
+- Contenu de /root/flag.txt : FLAG=3
+- Api key trouvée :9q8O16xcDI1CCGoO2y29
+
 - Pourquoi cette faille existe-t-elle ?
+  > Le daemon Docker tourne en root. Un utilisateur membre du groupe docker peut monter n'importe quel dossier de l'hôte dans un container, y compris /, ce qui donne accès à tout le système de fichiers avec les droits root.
 
-  > **Réponse :**
+- Expliquez l'exploit à un manager non-technique :
+  > On a utilisé Docker pour créer un mini-système qui a accès à tous les fichiers du serveur. Comme Docker tourne avec les droits administrateur, on a pu lire des fichiers normalement protégés, comme si on avait le mot de passe root.
 
-- Expliquez l'exploit comme si vous deviez le présenter à un manager non-technique.
-
-  > **Réponse :**
-
-- Comment devrait-on sécuriser l'accès à Docker en entreprise ?
-
-  > **Réponse :**
+- Comment sécuriser l'accès à Docker en entreprise ?
+  > Ne pas mettre les utilisateurs dans le groupe docker. Utiliser Podman qui est rootless, ou configurer des politiques d'accès strictes via sudo.
 
 ### ✅ Checkpoint
 
@@ -403,16 +406,13 @@ Testez Podman et comparez avec Docker.
 ### Questions
 
 - Pourquoi l'exploit ne fonctionne-t-il pas avec Podman ?
+  > Podman est rootless : les containers tournent avec l'UID de l'utilisateur courant, pas root. Monter / dans le container ne donne donc pas accès aux fichiers root.
 
-  > **Réponse :**
+- Différences architecturales entre Docker et Podman ?
+  > Docker utilise un daemon central qui tourne en root, ce qui donne des privilèges élevés à tous les utilisateurs du groupe docker. Podman n'a pas de daemon, chaque container tourne directement avec les droits de l'utilisateur qui le lance.
 
-- Quelles sont les différences architecturales entre Docker et Podman ?
-
-  > **Réponse :**
-
-- Dans quel contexte recommanderiez-vous Podman plutôt que Docker ?
-
-  > **Réponse :**
+- Dans quel contexte recommander Podman plutôt que Docker ?
+  > En entreprise sur des serveurs partagés où la sécurité est prioritaire, ou quand on ne veut pas donner de droits root implicites aux développeurs.
 
 
 ### ✅ Checkpoint

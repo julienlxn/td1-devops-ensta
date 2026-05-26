@@ -54,16 +54,13 @@ Voici les instructions dont vous aurez besoin (pas forcément dans cet ordre) :
 ### Questions
 
 - Que se passe-t-il si vous modifiez `app.py` ? Pourquoi ?
-
-  > **Réponse :**
+  Le changement n'est pas visible. Le code est copié dans l'image au moment du build, il faut rebuilder pour que les modifications soient prises en compte.
 
 - Comment arrêtez-vous le container ?
-
-  > **Commande utilisée :**
+  docker stop [container_id] ou Ctrl+C si lancé en mode attaché.
 
 - Quelle commande permet de voir les containers en cours d'exécution ?
-
-  > **Commande :**
+  docker ps
 
 ### ✅ Checkpoint
 
@@ -93,12 +90,11 @@ Utilisez un volume pour voir les modifications en temps réel sans rebuild.
 ### Questions
 
 - Pourquoi le changement est-il visible sans rebuild ?
-
-  > **Réponse :**
+  > Le volume monte le dossier local directement dans le container. Docker lit les fichiers depuis le disque de la machine hôte en temps réel, pas depuis l'image.
 
 - Si vous ajoutez une nouvelle dépendance dans `requirements.txt`, est-ce que le volume suffit ? Pourquoi ?
+  > Non. Le volume partage les fichiers mais pas l'environnement Python. Les dépendances sont installées au moment du build, il faut donc rebuilder pour les prendre en compte.
 
-  > **Réponse :**
 
 ### ✅ Checkpoint
 
@@ -154,16 +150,14 @@ docker compose exec <service> <commande>
 ### Questions
 
 - Pourquoi utilisez-vous `redis` comme hostname et pas `localhost` ?
-
-  > **Réponse :**
+  > Dans Docker Compose, chaque service tourne dans son propre container. localhost désignerait le container lui-même. Docker Compose crée un réseau interne où chaque service est accessible via son nom de service, ici redis.
 
 - Que fait `depends_on` ? Est-ce suffisant pour garantir que Redis est prêt ?
-
-  > **Réponse :**
+  > depends_on définit l'ordre de démarrage des services. Non, ce n'est pas suffisant : il garantit juste que le container Redis est lancé, pas qu'il est prêt à accepter des connexions.
 
 - Comment vérifiez-vous que Redis répond depuis l'intérieur du container app ?
+  > python -c "import redis; r = redis.Redis(host='redis'); print(r.ping())"
 
-  > **Commande utilisée :**
 
 ### ✅ Checkpoint
 
@@ -205,20 +199,17 @@ docker inspect <container_id>
 ### Questions
 
 - Où voyez-vous vos variables dans la sortie de `docker inspect` ?
-
-  > **Réponse :**
+  > Dans la section "Env" sous "Config".
 
 - Pourquoi est-ce un problème de sécurité ?
-
-  > **Réponse :**
+  > Les variables sont visibles en clair par quiconque a accès au daemon Docker, y compris les secrets comme SECRET_API_KEY.
 
 - Que devez-vous ajouter au `.gitignore` ?
-
-  > **Réponse :**
+  > Le fichier .env pour ne pas pousser les secrets sur GitHub.
 
 - En production, quelle serait une meilleure solution ?
+  > Utiliser un gestionnaire de secrets comme Azure Key Vault ou AWS Secrets Manager.
 
-  > **Réponse :**
 
 ### ✅ Checkpoint
 
@@ -262,16 +253,13 @@ docker inspect <container>
 ### Questions
 
 - Quelle est la différence entre `docker logs` et `docker compose logs` ?
-
-  > **Réponse :**
+  > docker logs cible un seul container par son ID. docker compose logs affiche les logs de tous les services du compose en même temps avec le nom du service devant chaque ligne.
 
 - À quoi sert un healthcheck ?
-
-  > **Réponse :**
+  > À vérifier automatiquement qu'un service est prêt et fonctionnel, pas juste démarré. Docker peut ainsi attendre qu'un service soit healthy avant de démarrer les services qui en dépendent.
 
 - Comment `depends_on` peut-il utiliser les healthchecks ?
-
-  > **Réponse :**
+  > Avec condition: service_healthy, le service app ne démarre que quand redis est marqué healthy par son healthcheck.
 
 ### ✅ Checkpoint
 
@@ -310,16 +298,13 @@ Optimisez la taille de l'image avec un multi-stage build.
 ### Questions
 
 - Quel gain de taille avez-vous obtenu ?
-
-  > Taille initiale : \_\_\_ Mo &nbsp; → &nbsp; Taille optimisée : \_\_\_ Mo
+  > Taille initiale : 837 Mo → Taille optimisée : 858 Mo. Pas de gain significatif ici car Streamlit et ses dépendances sont volumineuses dans les deux cas. Le multi-stage build est plus utile pour des apps avec des dépendances de compilation.
 
 - Pourquoi utiliser un utilisateur non-root ?
-
-  > **Réponse :**
+  > Si un attaquant exploite une faille dans l'app, il se retrouve avec les droits d'un utilisateur limité et non root, ce qui limite les dégâts sur le système.
 
 - Que se passe-t-il si vous essayez d'écrire dans un dossier appartenant à root ?
-
-  > **Réponse :**
+  > Permission denied, l'utilisateur non-root n'a pas les droits d'écriture dans les dossiers root.
 
 ### ✅ Checkpoint
 
